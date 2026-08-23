@@ -197,8 +197,32 @@
 
   /* Offline support - only over http(s), never when opened from a file. */
   if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+    /* Was this page already being served by a worker? If so, a worker
+       taking over later means a NEW version arrived, and the page is
+       showing the old cached files - so refresh once to pick it up.
+       Without this the tablet shows the previous version on the first
+       visit after every update. */
+    var hadWorker = !!navigator.serviceWorker.controller;
+    var refreshing = false;
+
+    function refreshOnce() {
+      if (!hadWorker || refreshing) return;   // first ever install: nothing stale
+      refreshing = true;
+      location.reload();
+    }
+
+    navigator.serviceWorker.addEventListener("controllerchange", refreshOnce);
+
     window.addEventListener("load", function () {
-      navigator.serviceWorker.register("sw.js").catch(function () {});
+      navigator.serviceWorker.register("sw.js").then(function (reg) {
+        reg.addEventListener("updatefound", function () {
+          var incoming = reg.installing;
+          if (!incoming) return;
+          incoming.addEventListener("statechange", function () {
+            if (incoming.state === "activated") refreshOnce();
+          });
+        });
+      }).catch(function () {});
     });
   }
 })();

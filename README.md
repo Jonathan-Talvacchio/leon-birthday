@@ -49,9 +49,10 @@ The number of candles on the cake follows `age` automatically.
 | `gravity` | smaller — the dragon floats instead of dropping |
 | `spacing` | bigger — more room between candle pairs |
 
-**After you change anything**, bump `CACHE_VERSION` in `sw.js` (`birthday-v1` →
-`birthday-v2`) and push. That tells tablets that already opened the app to pull
-down the new version instead of the cached one.
+**After you change anything**, bump `CACHE_VERSION` in `sw.js` (`birthday-v7` →
+`birthday-v8`) and push. Tablets that already have the app pick the new version
+up on their very next visit — the page notices the update and refreshes itself
+once, so nobody has to open it twice or clear anything.
 
 ## Files
 
