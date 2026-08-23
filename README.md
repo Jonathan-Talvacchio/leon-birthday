@@ -20,9 +20,9 @@ playing sounds. There is a 🔊 button in the top right to mute everything.
 
 | Screen | What happens |
 | --- | --- |
-| **Party** | Confetti rains down and pixel balloons float up. Tap a balloon to pop it. Happy Birthday plays on arrival, then loops more quietly. |
+| **Party** | Confetti rains down and pixel balloons float up. Tap a balloon to pop it. Happy Birthday plays when the app opens, then repeats quietly with a ten second breather between plays. |
 | **Birthday card** | A message and a cake with seven candles. Tap the cake to blow them out to a round of applause. Tap again to relight them. |
-| **Dragon Flap** | Tap anywhere to flap the dragon between the birthday candles, to a looping Las Mananitas. The best score is saved on the tablet. |
+| **Dragon Flap** | Tap anywhere to flap the dragon between the birthday candles, to Las Mananitas and Happy Birthday playing in turn. The best score is saved on the tablet. |
 
 ## Changing things
 

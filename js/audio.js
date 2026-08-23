@@ -14,10 +14,12 @@ var Sfx = (function () {
   var muted = false;
   var VOLUME = 0.3;
 
-  /* how loud each tune sits under the effects */
-  var MENU_FIRST = 1.0;    // the first play through, on the party screen
-  var MENU_LOOP = 0.55;    // quieter once it starts repeating
-  var GAME_LEVEL = 0.5;    // the game tune stays here the whole time
+  /* how loud the tunes sit under the effects */
+  var OPENING_LEVEL = 1.0;  // the very first play, when the app opens
+  var MUSIC_LEVEL = 0.5;    // everything after that
+  var MENU_GAP = 10;        // seconds of quiet between plays on the party screen
+  var GAME_GAP = 2.5;       // the game keeps moving along
+  var openingDone = false;
 
   function ensure() {
     if (ctx) return ctx;
@@ -50,7 +52,7 @@ var Sfx = (function () {
     if (!pending) return;
     var p = pending;
     pending = null;
-    startMusic(p.name, p.first, p.loop);
+    startMusic(p.key, p.tracks, p.level, p.gap);
   }
 
   function isUnlocked() {
@@ -163,51 +165,53 @@ var Sfx = (function () {
     }
   }
 
-  /* A room full of people clapping: one hissy wash for the crowd plus a
-     scatter of individual claps on top, then a little cheer over it. */
+  /* A room full of people clapping. No sustained noise bed - that is what
+     turns applause into static - just a lot of separate short claps, each
+     a filtered noise burst with a sharp attack and a very fast decay,
+     swelling and then tailing off. */
+  function clapAt(c, t, peak) {
+    var src = c.createBufferSource();
+    src.buffer = getNoise(c);
+    src.playbackRate.value = 0.75 + Math.random() * 0.9;   // vary the timbre
+
+    var hp = c.createBiquadFilter();
+    hp.type = "highpass";
+    hp.frequency.value = 650 + Math.random() * 450;        // no low rumble
+    var bp = c.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = 1100 + Math.random() * 1900;
+    bp.Q.value = 0.7 + Math.random() * 0.8;
+
+    var g = c.createGain();
+    var decay = 0.025 + Math.random() * 0.035;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(peak, t + 0.003);  // snap
+    g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+
+    src.connect(hp); hp.connect(bp); bp.connect(g); g.connect(master);
+    src.start(t, Math.random() * 0.4);                     // random spot in the noise
+    src.stop(t + decay + 0.05);
+  }
+
   function applause() {
     var c = ready();
     if (!c) return;
     var t0 = c.currentTime;
-    var dur = 2.8;
+    var dur = 2.6;
+    var claps = 140;
 
-    var wash = c.createBufferSource();
-    wash.buffer = getNoise(c);
-    wash.loop = true;
-    var bp = c.createBiquadFilter();
-    bp.type = "bandpass";
-    bp.frequency.value = 1900;
-    bp.Q.value = 0.6;
-    var wg = c.createGain();
-    wg.gain.setValueAtTime(0.0001, t0);
-    wg.gain.exponentialRampToValueAtTime(0.2, t0 + 0.3);
-    wg.gain.setValueAtTime(0.2, t0 + 1.4);
-    wg.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-    wash.connect(bp); bp.connect(wg); wg.connect(master);
-    wash.start(t0);
-    wash.stop(t0 + dur + 0.05);
-
-    for (var i = 0; i < 44; i++) {
-      var t = t0 + 0.02 + Math.random() * (dur * 0.82);
-      var clap = c.createBufferSource();
-      clap.buffer = getNoise(c);
-      var f = c.createBiquadFilter();
-      f.type = "bandpass";
-      f.frequency.value = 900 + Math.random() * 2400;
-      f.Q.value = 1.4;
-      var g = c.createGain();
-      var peak = 0.1 + Math.random() * 0.1;
-      g.gain.setValueAtTime(peak, t);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05 + Math.random() * 0.06);
-      clap.connect(f); f.connect(g); g.connect(master);
-      clap.start(t);
-      clap.stop(t + 0.14);
+    for (var i = 0; i < claps; i++) {
+      var at = 0.01 + Math.random() * dur;
+      var phase = at / dur;
+      /* quick swell, long tail off */
+      var env = phase < 0.12 ? phase / 0.12 : Math.pow(1 - (phase - 0.12) / 0.88, 1.4);
+      clapAt(c, t0 + at, 0.03 + 0.075 * env * (0.55 + Math.random() * 0.7));
     }
 
     /* a whoop over the top of the clapping */
     var notes = [523.25, 659.25, 783.99, 1046.5, 1318.5];
     for (var n = 0; n < notes.length; n++) {
-      voice(c, master, { from: notes[n], dur: 0.18, type: "triangle", vol: 0.16,
+      voice(c, master, { from: notes[n], dur: 0.18, type: "triangle", vol: 0.14,
                          at: t0 + 0.15 + n * 0.11 });
     }
   }
@@ -215,6 +219,7 @@ var Sfx = (function () {
   /* ---------------- music ---------------- */
 
   var N = {
+    D4: 293.66, "F#4": 369.99,
     G4: 392.00, A4: 440.00, B4: 493.88, C5: 523.25,
     D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99
   };
@@ -224,7 +229,6 @@ var Sfx = (function () {
     /* Happy Birthday To You */
     birthday: {
       beat: 0.4,
-      gap: 1.6,
       notes: [
         ["G4", .5], ["G4", .5], ["A4", 1], ["G4", 1], ["C5", 1], ["B4", 2],
         ["G4", .5], ["G4", .5], ["A4", 1], ["G4", 1], ["D5", 1], ["C5", 2],
@@ -232,15 +236,12 @@ var Sfx = (function () {
         ["F5", .5], ["F5", .5], ["E5", 1], ["C5", 1], ["D5", 1], ["C5", 2.5]
       ]
     },
-    /* Las Mananitas - a simple arrangement of the traditional waltz */
+    /* Las Mananitas - the opening line */
     mananitas: {
-      beat: 0.42,
-      gap: 1.4,
+      beat: 0.45,
       notes: [
-        ["G4", .5], ["G4", .5], ["C5", 1], ["C5", .5], ["C5", .5], ["D5", .5], ["E5", 1.5],
-        ["E5", .5], ["D5", .5], ["C5", 1], ["D5", .5], ["C5", .5], ["B4", 1.5],
-        ["G4", .5], ["G4", .5], ["C5", 1], ["C5", .5], ["C5", .5], ["D5", .5], ["E5", 1.5],
-        ["E5", .5], ["D5", .5], ["C5", 1], ["D5", .5], ["B4", .5], ["C5", 2]
+        ["D4", 1], ["G4", 1], ["G4", 1], ["F#4", .5], ["G4", .5], ["A4", 1], ["A4", 1],
+        ["G4", 1], ["B4", 1], ["D5", 1], ["C5", 1], ["B4", 1], ["A4", 1], ["G4", 2]
       ]
     }
   };
@@ -260,41 +261,48 @@ var Sfx = (function () {
     return t - startAt;
   }
 
-  /* Plays a tune and keeps looping it. firstLevel lets the very first
-     pass be louder than the repeats. Each run gets its own gain node, so
-     a tune fading out can never be turned back up by the one replacing
-     it. Scheduling happens even while muted, so unmuting drops you into
-     the middle of the tune rather than starting it over. */
-  function startMusic(name, firstLevel, loopLevel) {
-    if (session && session.name === name) return;   // already playing this one
+  /* Plays a list of tunes, looping round them forever with a gap in
+     between. Each run owns its gain node, so a tune fading out can never
+     be turned back up by the one replacing it. Nothing is scheduled
+     until audio is unlocked, otherwise the notes would pile up and all
+     fire together when the context resumes. */
+  function startMusic(key, tracks, level, gap) {
+    if (session && session.key === key) return;     // already running this one
     var c = ensure();
     if (!c) return;
-    var tune = MELODIES[name];
-    if (!tune) return;
     stopMusic();
 
-    /* Notes scheduled against a suspended context would all pile up and
-       fire at once when it resumes, so wait for the first tap instead. */
     if (c.state !== "running") {
-      pending = { name: name, first: firstLevel, loop: loopLevel };
+      pending = { key: key, tracks: tracks, level: level, gap: gap };
       return;
     }
 
     var gain = c.createGain();
-    gain.gain.value = firstLevel;
+    gain.gain.value = level;
     gain.connect(master);
 
-    var mine = { name: name, gain: gain, timer: null };
+    var mine = { key: key, gain: gain, timer: null, index: 0, track: null };
     session = mine;
 
-    function cycle(first) {
+    function cycle() {
       if (session !== mine) return;                 // superseded
-      gain.gain.cancelScheduledValues(c.currentTime);
-      gain.gain.setValueAtTime(first ? firstLevel : loopLevel, c.currentTime);
-      var dur = scheduleMelody(c, tune, gain, c.currentTime + 0.06);
-      mine.timer = setTimeout(function () { cycle(false); }, (dur + tune.gap) * 1000);
+      var name = tracks[mine.index % tracks.length];
+      mine.index++;
+      mine.track = name;
+      var tune = MELODIES[name];
+      if (!tune) return;
+
+      /* full volume only the very first time the app makes a sound */
+      var vol = openingDone ? level : OPENING_LEVEL;
+      openingDone = true;
+
+      var now = c.currentTime;
+      gain.gain.cancelScheduledValues(now);
+      gain.gain.setValueAtTime(vol, now);
+      var dur = scheduleMelody(c, tune, gain, now + 0.06);
+      mine.timer = setTimeout(cycle, (dur + gap) * 1000);
     }
-    cycle(true);
+    cycle();
   }
 
   function stopMusic() {
@@ -312,11 +320,14 @@ var Sfx = (function () {
     setTimeout(function () { try { mine.gain.disconnect(); } catch (e) {} }, 1500);
   }
 
+  function playing() { return session ? session.track : null; }
 
-  function playing() { return session ? session.name : null; }
-
-  function menuMusic() { startMusic("birthday", MENU_FIRST, MENU_LOOP); }
-  function gameMusic() { startMusic("mananitas", GAME_LEVEL, GAME_LEVEL); }
+  /* the party screen: Happy Birthday with a long breather between plays */
+  function menuMusic() { startMusic("menu", ["birthday"], MUSIC_LEVEL, MENU_GAP); }
+  /* the game alternates the two birthday songs */
+  function gameMusic() {
+    startMusic("game", ["mananitas", "birthday"], MUSIC_LEVEL, GAME_GAP);
+  }
 
   return {
     unlock: unlock,
