@@ -91,14 +91,17 @@
     if (name === "home") {
       Balloons.start();
       Confetti.rain(true);
+      Sfx.menuMusic();
     } else if (name === "card") {
       Balloons.stop();
       Confetti.rain(true);
       relightCake();
+      Sfx.menuMusic();            // the party tune carries on over the card
     } else if (name === "game") {
       Balloons.stop();
       Confetti.rain(false);
       Confetti.clear();
+      Sfx.gameMusic();
       Game.resize();
       Game.start();
     }
@@ -120,7 +123,7 @@
     cakeHint.textContent = "Hooray! Tap again to light them back up ✨";
     var r = cake.getBoundingClientRect();
     Confetti.burst(r.left + r.width / 2, r.top + r.height * 0.2, 60);
-    Sfx.happyBirthday();
+    Sfx.applause();
   }
 
   /* ---------------- sound ---------------- */

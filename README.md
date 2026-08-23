@@ -20,9 +20,9 @@ playing sounds. There is a 🔊 button in the top right to mute everything.
 
 | Screen | What happens |
 | --- | --- |
-| **Party** | Confetti rains down and pixel balloons float up. Tap a balloon to pop it. |
-| **Birthday card** | A message and a cake. Tap the cake to blow out the candles and hear Happy Birthday. Tap again to relight them. |
-| **Dragon Flap** | Tap anywhere to flap the dragon between the birthday candles. The best score is saved on the tablet. |
+| **Party** | Confetti rains down and pixel balloons float up. Tap a balloon to pop it. Happy Birthday plays on arrival, then loops more quietly. |
+| **Birthday card** | A message and a cake with seven candles. Tap the cake to blow them out to a round of applause. Tap again to relight them. |
+| **Dragon Flap** | Tap anywhere to flap the dragon between the birthday candles, to a looping Las Mananitas. The best score is saved on the tablet. |
 
 ## Changing things
 
@@ -63,7 +63,7 @@ icon.svg        home screen icon
 manifest.json   makes "Add to Home screen" open it fullscreen
 sw.js           small offline cache
 js/config.js    ← the only file you need to edit
-js/audio.js     all sounds, generated in the browser (no audio files)
+js/audio.js     all sounds and music, generated in the browser (no audio files)
 js/confetti.js  confetti particles
 js/balloons.js  floating, poppable balloons
 js/game.js      Dragon Flap
