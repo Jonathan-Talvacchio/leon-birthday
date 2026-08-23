@@ -76,8 +76,10 @@ art/            pixel art + the pixel font, all generated with PixelLab
 
 Every sprite in `art/` was generated with [PixelLab](https://pixellab.ai),
 along with `partypixel.ttf`, the pixel font the whole app is set in. The
-dragon's wing flap is a 7 frame animation (`dragon.png` plus `dragon-1..6.png`);
-drop any of those frames and it simply stops flapping.
+dragon's wing beat is a 7 frame animation (`dragon.png` plus `dragon-1..6.png`)
+that sweeps the wings from spread out to raised and plays back down again;
+drop any of those frames and it simply stops flapping. Each frame is anchored
+by the dragon's feet so only the wings move, not the body.
 
 The candle columns are built from `candle.png`: the rounded lip goes at the tip
 and one full turn of the spiral is repeated down the shaft, so the stripe runs

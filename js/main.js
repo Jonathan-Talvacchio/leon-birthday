@@ -50,24 +50,23 @@
     }
   }
 
-  /* Where each flame sits on the cake, as a percentage of the picture.
-     Two rows following the top of the cake so they read as candles
-     standing on it rather than sticks laid over it. */
+  /* One flame per cherry. These are the four cherry centres measured
+     off cake.png, as a percentage of the picture, nudged down a little
+     so each flame sits on top of its cherry. */
   var FLAME_SPOTS = [
-    [50, 21],
-    [36, 28], [64, 28],
-    [28, 35], [50, 34], [72, 35],
-    [50, 42]
+    [49.5, 21],     // back
+    [26.4, 32],     // left
+    [72.9, 32],     // right
+    [49.3, 44]      // front
   ];
 
   function buildCakeFlames() {
     var wrap = $("candles");
     if (!wrap || !Sprites.has("flame")) return;
-    var age = (window.PARTY && window.PARTY.age) || 7;
 
     wrap.innerHTML = "";
-    for (var i = 0; i < age; i++) {
-      var spot = FLAME_SPOTS[i % FLAME_SPOTS.length];
+    for (var i = 0; i < FLAME_SPOTS.length; i++) {
+      var spot = FLAME_SPOTS[i];
       var im = document.createElement("img");
       im.className = "pixel-flame";
       im.src = Sprites.src("flame");

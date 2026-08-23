@@ -556,7 +556,23 @@ var Game = (function () {
         box.h = bottom - box.y;
       }
     }
-    dragonAnim = { names: names, box: box };
+
+    /* The wings rise out of the top of the frame, and in the source art
+       the body sinks as they go. Anchor every frame by its feet so the
+       body stays put under the hitbox and only the wings move. */
+    var feet = [];
+    for (i = 0; i < names.length; i++) {
+      var fb = Sprites.bounds(names[i]);
+      feet.push(fb ? (fb.y + fb.h) - box.h : box.y);
+    }
+    /* The frames run from wings out to wings raised, so play them up and
+       back down again for a full beat instead of snapping back to the
+       start. The two end poses are not repeated at the turnaround. */
+    var seq = [];
+    for (i = 0; i < names.length; i++) seq.push(i);
+    for (i = names.length - 2; i > 0; i--) seq.push(i);
+
+    dragonAnim = { names: names, box: box, seq: seq, feet: feet };
     return dragonAnim;
   }
 
@@ -564,14 +580,22 @@ var Game = (function () {
     var anim = dragonFrames();
     if (anim && anim.box) {
       var box = anim.box;
-      var h = 66;
+      /* the box is tall enough for the raised wings, so scale up to keep
+         the body itself the size it was before the wings could lift */
+      var h = 86;
       var w = h * (box.w / box.h);
-      var fps = mode === "play" ? 14 : 9;
-      var sp = Sprites.get(anim.names[Math.floor(t * fps) % anim.names.length]);
+      /* about two full wing beats a second in flight, a little lazier
+         while he is hovering waiting to start */
+      var fps = mode === "play" ? 24 : 16;
+      var seq = anim.seq;
+      var frame = seq[Math.floor(t * fps) % seq.length];
+      var sp = Sprites.get(anim.names[frame]);
       ctx.save();
       ctx.translate(dragonX(), dragon.y);
       ctx.rotate(dragon.rot);
-      if (sp) ctx.drawImage(sp, box.x, box.y, box.w, box.h, -w / 2, -h / 2, w, h);
+      if (sp) {
+        ctx.drawImage(sp, box.x, anim.feet[frame], box.w, box.h, -w / 2, -h / 2, w, h);
+      }
       ctx.restore();
       return;
     }
