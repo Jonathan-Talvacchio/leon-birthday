@@ -50,6 +50,35 @@
     }
   }
 
+  /* Where each flame sits on the cake, as a percentage of the picture.
+     Two rows following the top of the cake so they read as candles
+     standing on it rather than sticks laid over it. */
+  var FLAME_SPOTS = [
+    [50, 21],
+    [36, 28], [64, 28],
+    [28, 35], [50, 34], [72, 35],
+    [50, 42]
+  ];
+
+  function buildCakeFlames() {
+    var wrap = $("candles");
+    if (!wrap || !Sprites.has("flame")) return;
+    var age = (window.PARTY && window.PARTY.age) || 7;
+
+    wrap.innerHTML = "";
+    for (var i = 0; i < age; i++) {
+      var spot = FLAME_SPOTS[i % FLAME_SPOTS.length];
+      var im = document.createElement("img");
+      im.className = "pixel-flame";
+      im.src = Sprites.src("flame");
+      im.alt = "";
+      im.style.left = spot[0] + "%";
+      im.style.top = spot[1] + "%";
+      im.style.animationDelay = (i * 0.07) + "s";
+      wrap.appendChild(im);
+    }
+  }
+
   /* ---------------- screens ---------------- */
 
   function showScreen(name) {
@@ -140,6 +169,7 @@
         cakeImg.src = Sprites.src("cake");
         cakeImg.hidden = false;
         cake.classList.add("has-art");
+        buildCakeFlames();
       }
       if (current === "home") {        // restart so balloons pick up their sprites
         Balloons.stop();

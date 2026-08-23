@@ -35,6 +35,9 @@ var Game = (function () {
 
   var BEST_KEY = "dragonFlapBest";
 
+  /* how much of the candle wax is the rounded lip at the tip */
+  var RIM_FRACTION = 0.22;
+
   var cv, ctx;
   var els = {};
   var cssW = 0, cssH = 0, dpr = 1, scale = 1;
@@ -411,33 +414,54 @@ var Game = (function () {
     ctx.stroke();
   }
 
-  /* One candle, built from the sprite's wax only: a rim at the gap end
-     and a single row of that same wax stretched down the shaft, so the
-     column is seamless at any length and the flame stays a sensible size.
+  /* The wax of one candle: the rounded lip at the gap end, then one full
+     turn of the spiral repeated for the whole length, so the stripe runs
+     unbroken from the flame to the ground. A candle hanging from the
+     ceiling is the same drawing mirrored about its tip.
      tipY is the gap end, endY is the ceiling or the ground. */
-  function drawSpriteCandle(sp, box, x, w, tipY, endY, flip, seed) {
-    var rimH = w * (box.wideH / box.w) * 0.42;   // just the top lip of the wax
-    var dir = flip ? -1 : 1;                      // which way the candle runs
+  function drawCandleWax(sp, box, x, w, tipY, endY) {
+    var s = w / box.w;                             // world units per sprite pixel
+    var rimSrcH = Math.max(1, Math.round(box.wideH * RIM_FRACTION));
+    var rimH = rimSrcH * s;
+    var len = endY - tipY;
 
-    var shaftTop = flip ? endY : tipY + rimH;
-    var shaftBottom = flip ? tipY - rimH : endY;
-
-    if (shaftBottom - shaftTop > 0) {
-      var waxRow = box.wideY + Math.round(box.wideH * 0.75);
-      ctx.drawImage(sp, box.x, waxRow, box.w, 1,
-                    x, shaftTop, w, shaftBottom - shaftTop);
-    }
-
-    /* the wax rim, mirrored when the candle hangs from the ceiling */
-    var rimSrcH = Math.max(1, Math.round(box.wideH * 0.42));
-    var rimTop = flip ? tipY - rimH : tipY;
     ctx.save();
-    if (flip) {
-      ctx.translate(0, rimTop + rimH / 2);
-      ctx.scale(1, -1);
-      ctx.translate(0, -(rimTop + rimH / 2));
+    ctx.beginPath();
+    ctx.rect(x, tipY, w, Math.max(0, len));
+    ctx.clip();
+
+    ctx.drawImage(sp, box.x, box.wideY, box.w, rimSrcH, x, tipY, w, rimH);
+
+    var shaftTop = tipY + rimH;
+    var shaftH = endY - shaftTop;
+    if (shaftH > 0) {
+      var period = box.period;
+      var srcTop = box.wideY + rimSrcH;            // carry on from the rim
+      if (period > 4 && srcTop + period <= box.wideY + box.wideH) {
+        var tileH = period * s;
+        for (var dy = shaftTop; dy < endY; dy += tileH) {
+          ctx.drawImage(sp, box.x, srcTop, box.w, period, x, dy, w, tileH);
+        }
+      } else {
+        var waxRow = box.wideY + Math.round(box.wideH * 0.75);
+        ctx.drawImage(sp, box.x, waxRow, box.w, 1, x, shaftTop, w, shaftH);
+      }
     }
-    ctx.drawImage(sp, box.x, box.wideY, box.w, rimSrcH, x, rimTop, w, rimH);
+    ctx.restore();
+  }
+
+  function drawSpriteCandle(sp, box, x, w, tipY, endY, flip, seed) {
+    var rimH = Math.max(1, Math.round(box.wideH * RIM_FRACTION)) * (w / box.w);
+
+    ctx.save();
+    if (flip) {                                    // hang it from the ceiling
+      ctx.translate(0, tipY);
+      ctx.scale(1, -1);
+      ctx.translate(0, -tipY);
+      drawCandleWax(sp, box, x, w, tipY, tipY + (tipY - endY));
+    } else {
+      drawCandleWax(sp, box, x, w, tipY, endY);
+    }
     ctx.restore();
 
     /* flame sitting just off the tip, flickering */
@@ -505,18 +529,49 @@ var Game = (function () {
     ctx.fillRect(0, gY, W, 9);
   }
 
+  /* The flap frames share one source rectangle - the union of them all -
+     so the wings can move without the whole dragon changing size. */
+  var dragonAnim = null;
+  function dragonFrames() {
+    if (dragonAnim && Sprites.isLoaded()) return dragonAnim;
+    if (!Sprites.has("dragon")) return null;
+
+    var names = ["dragon"];
+    for (var i = 1; i <= 6; i++) {
+      if (Sprites.has("dragon" + i)) names.push("dragon" + i);
+    }
+
+    var box = null;
+    for (i = 0; i < names.length; i++) {
+      var b = Sprites.bounds(names[i]);
+      if (!b) continue;
+      if (!box) {
+        box = { x: b.x, y: b.y, w: b.w, h: b.h };
+      } else {
+        var right = Math.max(box.x + box.w, b.x + b.w);
+        var bottom = Math.max(box.y + box.h, b.y + b.h);
+        box.x = Math.min(box.x, b.x);
+        box.y = Math.min(box.y, b.y);
+        box.w = right - box.x;
+        box.h = bottom - box.y;
+      }
+    }
+    dragonAnim = { names: names, box: box };
+    return dragonAnim;
+  }
+
   function drawDragon() {
-    var sp = Sprites.get("dragon");
-    if (sp) {
-      var box = Sprites.bounds("dragon");
-      var h = 62;
+    var anim = dragonFrames();
+    if (anim && anim.box) {
+      var box = anim.box;
+      var h = 66;
       var w = h * (box.w / box.h);
-      /* a gentle bob stands in for the wing flap of the drawn version */
-      var bob = Math.sin(dragon.wing) * 2.5;
+      var fps = mode === "play" ? 14 : 9;
+      var sp = Sprites.get(anim.names[Math.floor(t * fps) % anim.names.length]);
       ctx.save();
       ctx.translate(dragonX(), dragon.y);
       ctx.rotate(dragon.rot);
-      ctx.drawImage(sp, box.x, box.y, box.w, box.h, -w / 2, -h / 2 + bob, w, h);
+      if (sp) ctx.drawImage(sp, box.x, box.y, box.w, box.h, -w / 2, -h / 2, w, h);
       ctx.restore();
       return;
     }

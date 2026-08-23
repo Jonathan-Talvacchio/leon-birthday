@@ -75,7 +75,14 @@ art/            pixel art + the pixel font, all generated with PixelLab
 ## The pixel art
 
 Every sprite in `art/` was generated with [PixelLab](https://pixellab.ai),
-along with `partypixel.ttf`, the pixel font the whole app is set in.
+along with `partypixel.ttf`, the pixel font the whole app is set in. The
+dragon's wing flap is a 7 frame animation (`dragon.png` plus `dragon-1..6.png`);
+drop any of those frames and it simply stops flapping.
+
+The candle columns are built from `candle.png`: the rounded lip goes at the tip
+and one full turn of the spiral is repeated down the shaft, so the stripe runs
+unbroken however tall the candle is. The turn length is measured from the image
+at load time, so a replacement candle sprite with a different stripe still works.
 
 Sprites are optional by design. `js/sprites.js` loads them in the background and
 each drawing asks for its sprite first, falling back to the original hand drawn

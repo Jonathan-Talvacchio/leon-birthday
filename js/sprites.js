@@ -36,6 +36,38 @@ var Sprites = (function () {
   /* Generated art comes with transparent padding around the subject.
      Measure the real content box once so drawings can fill the space
      they are given instead of floating inside invisible margins. */
+  /* Slide the wax against itself and find the shift where it lines up
+     again. Skips the rounded lip at the top and the outline at the very
+     bottom, since neither repeats. */
+  function findPeriod(d, imW, box) {
+    var top = box.wideY + Math.round(box.wideH * 0.10);
+    var bot = box.wideY + box.wideH - Math.round(box.wideH * 0.06);
+    /* A spiral can turn slowly, so look almost the whole way down and
+       just insist on enough overlapping rows to trust the match. */
+    var maxP = bot - top - 15;
+    if (maxP < 4) return 0;
+
+    var bestP = 0, bestScore = Infinity;
+    for (var p = 4; p <= maxP; p++) {
+      var diff = 0, n = 0;
+      for (var y = top; y + p < bot; y += 2) {
+        for (var x = box.x; x < box.x + box.w; x += 2) {
+          var i1 = (y * imW + x) * 4;
+          var i2 = ((y + p) * imW + x) * 4;
+          diff += Math.abs(d[i1] - d[i2]) +
+                  Math.abs(d[i1 + 1] - d[i2 + 1]) +
+                  Math.abs(d[i1 + 2] - d[i2 + 2]);
+          n += 3;
+        }
+      }
+      if (!n) continue;
+      var score = diff / n;
+      if (score < bestScore) { bestScore = score; bestP = p; }
+    }
+    /* a real repeat is nearly identical; anything vague is not worth tiling */
+    return bestScore < 12 ? bestP : 0;
+  }
+
   var boxes = {};
   function bounds(name) {
     if (boxes[name]) return boxes[name];
@@ -81,9 +113,16 @@ var Sprites = (function () {
         }
         box.wideY = wideY;
         box.wideH = box.y + box.h - wideY;
+
+        /* How far down does the pattern travel before it repeats? For a
+           barber pole stripe that is the height of one full turn, and it
+           lets a column of any length be tiled without breaking the
+           spiral. 0 means "no clean repeat found, do not tile". */
+        box.period = findPeriod(d, im.width, box);
       }
     } catch (e) { /* keep the untrimmed box */ }
     if (box.wideY == null) { box.wideY = box.y; box.wideH = box.h; }
+    if (box.period == null) box.period = 0;
 
     boxes[name] = box;
     return box;

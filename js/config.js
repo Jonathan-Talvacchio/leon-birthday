@@ -20,6 +20,13 @@ var PARTY = {
    to the hand drawn version, so the app never breaks over a stray file. */
 var ART = {
   dragon:  "art/dragon.png",         // the flying hero, facing right
+  /* wing flap frames - drop any of these and the dragon simply stops flapping */
+  dragon1: "art/dragon-1.png",
+  dragon2: "art/dragon-2.png",
+  dragon3: "art/dragon-3.png",
+  dragon4: "art/dragon-4.png",
+  dragon5: "art/dragon-5.png",
+  dragon6: "art/dragon-6.png",
   candle:  "art/candle.png",         // striped wax; its rim and column both come from this
   flame:   "art/flame.png",          // flame that sits at the tip of each candle
   grass:   "art/grass-block.png",    // ground tile
