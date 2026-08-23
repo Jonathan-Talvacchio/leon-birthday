@@ -20,7 +20,7 @@ playing sounds. There is a 🔊 button in the top right to mute everything.
 
 | Screen | What happens |
 | --- | --- |
-| **Party** | Confetti rains down and balloons float up. Tap a balloon to pop it. |
+| **Party** | Confetti rains down and pixel balloons float up. Tap a balloon to pop it. |
 | **Birthday card** | A message and a cake. Tap the cake to blow out the candles and hear Happy Birthday. Tap again to relight them. |
 | **Dragon Flap** | Tap anywhere to flap the dragon between the birthday candles. The best score is saved on the tablet. |
 
@@ -67,7 +67,24 @@ js/confetti.js  confetti particles
 js/balloons.js  floating, poppable balloons
 js/game.js      Dragon Flap
 js/main.js      screen switching and wiring
+js/sprites.js   loads the pixel art, falls back to drawn art if any is missing
+art/            pixel art + the pixel font, all generated with PixelLab
 ```
+
+## The pixel art
+
+Every sprite in `art/` was generated with [PixelLab](https://pixellab.ai),
+along with `partypixel.ttf`, the pixel font the whole app is set in.
+
+Sprites are optional by design. `js/sprites.js` loads them in the background and
+each drawing asks for its sprite first, falling back to the original hand drawn
+version if the file is missing or fails to load. Deleting a PNG changes how the
+app looks, never whether it works.
+
+To swap in your own art, drop a replacement PNG in `art/` under the same name
+(or point `ART` in `js/config.js` somewhere else) and bump `CACHE_VERSION` in
+`sw.js`. Transparent padding is trimmed automatically, so the new sprite does not
+have to be framed the same way as the old one.
 
 ## Running it locally
 

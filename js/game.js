@@ -1,9 +1,11 @@
 /* ============================================================
    Dragon Flap - a birthday Flappy Bird, tuned gentle for a 7 year old.
 
-   Everything is drawn with canvas paths (no images) and the physics
-   runs on a fixed timestep so it plays identically on a 60Hz phone
-   and a 120Hz tablet.
+   Draws the pixel art from art/ when it is there and falls back to
+   hand drawn canvas paths when it is not. The physics runs on a fixed
+   timestep so it plays identically on a 60Hz phone and a 120Hz tablet.
+
+   Nothing moves until the first tap - the countdown is only a flourish.
 
    Want it easier or harder? Change CONFIG below:
      gapStart  bigger  = easier      scroll  smaller = easier
@@ -160,12 +162,20 @@ var Game = (function () {
     raf = requestAnimationFrame(loop);
   }
 
+  /* Nothing moves until the first tap, so the countdown running out can
+     never drop the dragon on the floor before he has touched the screen. */
   function flap() {
+    if (mode === "ready") {
+      mode = "play";
+      countdown = 0;
+      dragon.vy = CONFIG.flapV;
+      if (els.hudWrap) els.hudWrap.style.opacity = "1";
+      Sfx.flap();
+      return;
+    }
     if (mode === "play") {
       dragon.vy = CONFIG.flapV;
       Sfx.flap();
-    } else if (mode === "ready" && countdown > 0.35) {
-      countdown = 0.35;             // impatient tapper? skip ahead
     }
   }
 
@@ -256,16 +266,11 @@ var Game = (function () {
     }
 
     if (mode === "ready") {
-      countdown -= dt;
+      if (countdown > 0) countdown = Math.max(0, countdown - dt);
       dragon.y = H * 0.42 + Math.sin(t * 3.4) * 10;
       dragon.rot = Math.sin(t * 3.4) * 0.07;
-      if (countdown <= 0) {
-        mode = "play";
-        dragon.vy = CONFIG.flapV * 0.55;
-        if (els.hudWrap) els.hudWrap.style.opacity = "1";
-      }
       dragon.wing += dt * 11;
-      return;
+      return;                        // waits here for the first tap
     }
 
     /* gravity applies while playing and while tumbling down */
@@ -643,13 +648,18 @@ var Game = (function () {
   }
 
   function drawCountdown() {
-    var label, big;
+    var label, big, phase;
     if (countdown > 1.8)      { label = "3"; big = true; }
     else if (countdown > 1.2) { label = "2"; big = true; }
     else if (countdown > 0.6) { label = "1"; big = true; }
-    else                      { label = "GO!"; big = false; }
+    else if (countdown > 0)   { label = "GO!"; big = false; }
+    else                      { label = "TAP TO FLY!"; big = false; }
 
-    var phase = big ? (countdown % 0.6) / 0.6 : Math.max(0, countdown / 0.6);
+    if (countdown > 0) {
+      phase = big ? (countdown % 0.6) / 0.6 : Math.max(0, countdown / 0.6);
+    } else {
+      phase = (Math.sin(t * 4) + 1) / 2;      // gentle pulse while waiting
+    }
     var pop = 1 + (1 - phase) * 0.25;
 
     ctx.save();
@@ -657,7 +667,7 @@ var Game = (function () {
     ctx.scale(pop, pop);
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.font = "900 " + (big ? 92 : 72) + "px 'Comic Sans MS', 'Trebuchet MS', sans-serif";
+    ctx.font = "900 " + (big ? 92 : (label.length > 4 ? 44 : 72)) + "px PartyPixel, sans-serif";
     ctx.lineWidth = 10;
     ctx.strokeStyle = "rgba(60,40,110,0.85)";
     ctx.strokeText(label, 0, 0);
@@ -667,7 +677,7 @@ var Game = (function () {
 
     ctx.save();
     ctx.textAlign = "center";
-    ctx.font = "700 26px 'Comic Sans MS', 'Trebuchet MS', sans-serif";
+    ctx.font = "700 22px PartyPixel, sans-serif";
     ctx.lineWidth = 6;
     ctx.strokeStyle = "rgba(60,40,110,0.8)";
     ctx.strokeText("Tap anywhere to flap!", W / 2, H * 0.30 + 90);
