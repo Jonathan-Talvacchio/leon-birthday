@@ -171,6 +171,7 @@
     });
 
     showScreen("home");
+    window.__partyReady = true;      // tells the recovery guard we made it
   }
 
   if (document.readyState === "loading") {

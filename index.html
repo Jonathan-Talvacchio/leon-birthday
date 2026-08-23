@@ -88,6 +88,27 @@
     </div>
   </section>
 
+  <script>
+    /* Flaky party wifi can drop one script and leave a half loaded page.
+       Reload once if that happens - never more than once, so a real bug
+       cannot put us in a loop. */
+    (function () {
+      function reloadOnce() {
+        try {
+          if (sessionStorage.getItem("recoveredOnce")) return;
+          sessionStorage.setItem("recoveredOnce", "1");
+          location.reload();
+        } catch (e) {}
+      }
+      window.addEventListener("error", function (e) {
+        if (e.target && e.target.tagName === "SCRIPT") reloadOnce();
+      }, true);
+      window.addEventListener("load", function () {
+        setTimeout(function () { if (!window.__partyReady) reloadOnce(); }, 1500);
+      });
+    })();
+  </script>
+
   <script src="js/config.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/confetti.js"></script>
