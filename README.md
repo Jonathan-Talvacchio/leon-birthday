@@ -9,7 +9,7 @@ dependencies.** It runs straight from GitHub Pages in any modern browser.
 ## Open it on the tablet
 
 1. Open Chrome on the Android tablet.
-2. Go to the GitHub Pages URL for this repo.
+2. Go to **https://jonathan-talvacchio.github.io/leon-birthday/**
 3. Optional, and worth doing: tap the **⋮** menu → **Add to Home screen**. It then
    opens fullscreen with its own icon, just like an installed app.
 
