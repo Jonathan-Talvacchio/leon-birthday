@@ -17,8 +17,7 @@ var Sfx = (function () {
   /* how loud the tunes sit under the effects */
   var OPENING_LEVEL = 1.0;  // the very first play, when the app opens
   var MUSIC_LEVEL = 0.5;    // everything after that
-  var MENU_GAP = 10;        // seconds of quiet between plays on the party screen
-  var GAME_GAP = 2.5;       // the game keeps moving along
+  var TRACK_GAP = 10;       // seconds of quiet between songs
   var openingDone = false;
 
   function ensure() {
@@ -165,11 +164,26 @@ var Sfx = (function () {
     }
   }
 
+  /* Pull the music down for a moment so something can be heard over it,
+     then bring it back. */
+  function duckMusic(factor, hold, recover) {
+    if (!session || !ctx) return;
+    var g = session.gain.gain;
+    var t = ctx.currentTime;
+    var target = Math.max(0.0001, session.level * factor);
+    g.cancelScheduledValues(t);
+    g.setValueAtTime(g.value, t);
+    g.linearRampToValueAtTime(target, t + 0.08);
+    g.setValueAtTime(target, t + hold);
+    g.linearRampToValueAtTime(session.level, t + hold + recover);
+  }
+
   /* A room full of people clapping. No sustained noise bed - that is what
      turns applause into static - just a lot of separate short claps, each
      a filtered noise burst with a sharp attack and a very fast decay,
      swelling and then tailing off. */
   function clapAt(c, t, peak) {
+    if (!isFinite(peak) || peak <= 0) return;
     var src = c.createBufferSource();
     src.buffer = getNoise(c);
     src.playbackRate.value = 0.75 + Math.random() * 0.9;   // vary the timbre
@@ -200,18 +214,23 @@ var Sfx = (function () {
     var dur = 2.6;
     var claps = 140;
 
+    duckMusic(0.35, 1.8, 0.9);      // let the clapping through
+
     for (var i = 0; i < claps; i++) {
       var at = 0.01 + Math.random() * dur;
-      var phase = at / dur;
-      /* quick swell, long tail off */
-      var env = phase < 0.12 ? phase / 0.12 : Math.pow(1 - (phase - 0.12) / 0.88, 1.4);
-      clapAt(c, t0 + at, 0.03 + 0.075 * env * (0.55 + Math.random() * 0.7));
+      var phase = Math.min(1, at / dur);
+      /* quick swell, long tail off. The tail is clamped at zero first:
+         a negative base here would make Math.pow return NaN, and a NaN
+         gain throws when it is scheduled. */
+      var tail = Math.max(0, 1 - (phase - 0.12) / 0.88);
+      var env = phase < 0.12 ? phase / 0.12 : Math.pow(tail, 1.4);
+      clapAt(c, t0 + at, 0.07 + 0.17 * env * (0.55 + Math.random() * 0.7));
     }
 
     /* a whoop over the top of the clapping */
     var notes = [523.25, 659.25, 783.99, 1046.5, 1318.5];
     for (var n = 0; n < notes.length; n++) {
-      voice(c, master, { from: notes[n], dur: 0.18, type: "triangle", vol: 0.14,
+      voice(c, master, { from: notes[n], dur: 0.18, type: "triangle", vol: 0.22,
                          at: t0 + 0.15 + n * 0.11 });
     }
   }
@@ -281,7 +300,7 @@ var Sfx = (function () {
     gain.gain.value = level;
     gain.connect(master);
 
-    var mine = { key: key, gain: gain, timer: null, index: 0, track: null };
+    var mine = { key: key, gain: gain, timer: null, index: 0, track: null, level: level };
     session = mine;
 
     function cycle() {
@@ -295,6 +314,7 @@ var Sfx = (function () {
       /* full volume only the very first time the app makes a sound */
       var vol = openingDone ? level : OPENING_LEVEL;
       openingDone = true;
+      mine.level = vol;
 
       var now = c.currentTime;
       gain.gain.cancelScheduledValues(now);
@@ -322,11 +342,11 @@ var Sfx = (function () {
 
   function playing() { return session ? session.track : null; }
 
-  /* the party screen: Happy Birthday with a long breather between plays */
-  function menuMusic() { startMusic("menu", ["birthday"], MUSIC_LEVEL, MENU_GAP); }
-  /* the game alternates the two birthday songs */
-  function gameMusic() {
-    startMusic("game", ["mananitas", "birthday"], MUSIC_LEVEL, GAME_GAP);
+  /* One playlist for the whole app. Every screen asks for it and the
+     call does nothing if it is already running, so the music carries on
+     across the party screen, the card and the game without restarting. */
+  function partyMusic() {
+    startMusic("party", ["birthday", "mananitas"], MUSIC_LEVEL, TRACK_GAP);
   }
 
   return {
@@ -340,8 +360,7 @@ var Sfx = (function () {
     crash: crash,
     cheer: cheer,
     applause: applause,
-    menuMusic: menuMusic,
-    gameMusic: gameMusic,
+    partyMusic: partyMusic,
     stopMusic: stopMusic,
     playing: playing
   };

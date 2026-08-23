@@ -91,17 +91,17 @@
     if (name === "home") {
       Balloons.start();
       Confetti.rain(true);
-      Sfx.menuMusic();
+      Sfx.partyMusic();
     } else if (name === "card") {
       Balloons.stop();
       Confetti.rain(true);
       relightCake();
-      Sfx.menuMusic();            // the party tune carries on over the card
+      Sfx.partyMusic();
     } else if (name === "game") {
       Balloons.stop();
       Confetti.rain(false);
       Confetti.clear();
-      Sfx.gameMusic();
+      Sfx.partyMusic();           // same playlist, never restarted
       Game.resize();
       Game.start();
     }
