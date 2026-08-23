@@ -238,9 +238,16 @@ var Sfx = (function () {
   /* ---------------- music ---------------- */
 
   var N = {
-    D4: 293.66, "F#4": 369.99,
-    G4: 392.00, A4: 440.00, B4: 493.88, C5: 523.25,
+    C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, "F#4": 369.99,
+    G4: 392.00, A4: 440.00, "Bb4": 466.16, B4: 493.88, C5: 523.25,
     D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99
+  };
+
+  /* left hand chords, written under the melody */
+  var CHORDS = {
+    F:   { bass: 174.61, tones: [220.00, 261.63] },          // F  A  C
+    C7:  { bass: 130.81, tones: [164.81, 196.00, 233.08] },  // C  E  G  Bb
+    Bb:  { bass: 116.54, tones: [146.83, 174.61] }           // Bb D  F
   };
 
   /* [note, beats] */
@@ -255,12 +262,27 @@ var Sfx = (function () {
         ["F5", .5], ["F5", .5], ["E5", 1], ["C5", 1], ["D5", 1], ["C5", 2.5]
       ]
     },
-    /* Las Mananitas - the opening line */
+    /* Las Mananitas, in F major and 3/4 as the sheet music has it, at a
+       100bpm waltz. One beat pickup then five bars of three. The chord
+       row is the left hand: root on beat one, chord on beats two and
+       three, using the F / C7 / Bb of the score. */
     mananitas: {
-      beat: 0.45,
+      beat: 0.6,
       notes: [
-        ["D4", 1], ["G4", 1], ["G4", 1], ["F#4", .5], ["G4", .5], ["A4", 1], ["A4", 1],
-        ["G4", 1], ["B4", 1], ["D5", 1], ["C5", 1], ["B4", 1], ["A4", 1], ["G4", 2]
+        ["C4", 1],                                        // pickup
+        ["F4", 1], ["F4", 1], ["E4", .5], ["F4", .5],     // bar 1
+        ["G4", 1], ["G4", 1], ["F4", 1],                  // bar 2
+        ["A4", 1], ["C5", 1], ["Bb4", 1],                 // bar 3
+        ["A4", 1], ["G4", 2],                             // bar 4
+        ["F4", 3]                                         // bar 5
+      ],
+      chords: [
+        ["C7", 1],
+        ["F", 3],
+        ["C7", 3],
+        ["F", 2], ["Bb", 1],
+        ["C7", 3],
+        ["F", 3]
       ]
     }
   };
@@ -277,7 +299,28 @@ var Sfx = (function () {
       voice(c, dest, { from: freq / 2, dur: len * 0.88, type: "sine", vol: 0.1, at: t });
       t += len;
     }
-    return t - startAt;
+    var end = t;
+
+    /* oom pah pah underneath, when the tune carries chords */
+    if (tune.chords) {
+      var ct = startAt;
+      for (var k = 0; k < tune.chords.length; k++) {
+        var ch = CHORDS[tune.chords[k][0]];
+        var bars = tune.chords[k][1];
+        if (ch) {
+          voice(c, dest, { from: ch.bass, dur: tune.beat * 0.85, type: "sine",
+                           vol: 0.14, at: ct });
+          for (var b = 1; b < bars; b++) {
+            for (var n = 0; n < ch.tones.length; n++) {
+              voice(c, dest, { from: ch.tones[n], dur: tune.beat * 0.55,
+                               type: "triangle", vol: 0.05, at: ct + b * tune.beat });
+            }
+          }
+        }
+        ct += bars * tune.beat;
+      }
+    }
+    return end - startAt;
   }
 
   /* Plays a list of tunes, looping round them forever with a gap in

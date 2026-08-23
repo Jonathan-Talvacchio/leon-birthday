@@ -4,7 +4,7 @@
    Everything here is best effort: if caching fails for any reason the
    app still works, it just loads from the network like a normal page. */
 
-var CACHE_VERSION = "birthday-v13";
+var CACHE_VERSION = "birthday-v14";
 
 var FILES = [
   "./",
