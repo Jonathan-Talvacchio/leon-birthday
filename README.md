@@ -76,10 +76,13 @@ art/            pixel art + the pixel font, all generated with PixelLab
 
 Every sprite in `art/` was generated with [PixelLab](https://pixellab.ai),
 along with `partypixel.ttf`, the pixel font the whole app is set in. The
-dragon's wing beat is a 7 frame animation (`dragon.png` plus `dragon-1..6.png`)
-that sweeps the wings from spread out to raised and plays back down again;
-drop any of those frames and it simply stops flapping. Each frame is anchored
-by the dragon's feet so only the wings move, not the body.
+dragon has three drawn wing positions - `dragon.png` (level), `dragon-up.png`
+and `dragon-down.png` - cycled level, up, level, down the way the original
+Flappy Bird does it. Drop either of the extra two and he simply stops flapping.
+Each pose is anchored by the dragon's feet so only the wings move, not the body.
+
+The cake carries seven unlit candles; the flames are laid on top at runtime from
+`flame.png`, positioned at each wick, which is what lets them be blown out.
 
 The candle columns are built from `candle.png`: the rounded lip goes at the tip
 and one full turn of the spiral is repeated down the shaft, so the stripe runs

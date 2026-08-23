@@ -50,14 +50,14 @@
     }
   }
 
-  /* One flame per cherry. These are the four cherry centres measured
-     off cake.png, as a percentage of the picture, nudged down a little
-     so each flame sits on top of its cherry. */
+  /* One flame per candle, sitting at the tip of each wick. Read off
+     cake.png as percentages of the picture, so the flames stay put
+     whatever size the cake is drawn at. */
   var FLAME_SPOTS = [
-    [49.5, 21],     // back
-    [26.4, 32],     // left
-    [72.9, 32],     // right
-    [49.3, 44]      // front
+    [48.5, 7],                  // back
+    [35, 13.5], [63, 13.5],
+    [21.5, 21.5], [78.5, 21.5],
+    [35, 29], [63, 29]          // front pair
   ];
 
   function buildCakeFlames() {

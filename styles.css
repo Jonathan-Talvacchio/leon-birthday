@@ -495,7 +495,7 @@ img, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
   height: auto;
   image-rendering: pixelated;
 }
-.cake.has-art { width: 46vmin; max-width: 230px; height: 46vmin; max-height: 230px; }
+.cake.has-art { width: 58vmin; max-width: 300px; height: 58vmin; max-height: 300px; }
 .cake.has-art .layer, .cake.has-art .plate { display: none; }
 .cake.has-art .candles { bottom: 52%; gap: 1.6vmin; }
 
@@ -552,7 +552,7 @@ body, .big-btn {
   position: absolute;
   /* the flame sprite carries a lot of transparent padding, so the box is
      much wider than the flame that shows inside it */
-  width: 26%;
+  width: 22%;
   height: auto;
   transform: translate(-50%, -80%);
   transform-origin: 50% 100%;
@@ -570,3 +570,17 @@ body, .big-btn {
   transform: translate(-50%, -110%) scale(.25);
   transition: opacity .3s ease-out, transform .3s ease-out;
 }
+
+/* ---- same cloud art as the game, instead of CSS blocks ---- */
+.cloud {
+  background: url("art/cloud.png") no-repeat center center;
+  background-size: 100% 100%;
+  image-rendering: pixelated;
+  opacity: 1;
+  border-radius: 0;
+}
+.cloud::before, .cloud::after { display: none; }
+/* the sprite is 2:1, so every cloud keeps that shape */
+.c1 { width: 22vmin;   height: 11vmin;   top: 8%;  }
+.c2 { width: 16vmin;   height: 8vmin;    top: 20%; }
+.c3 { width: 27vmin;   height: 13.5vmin; top: 33%; opacity: .85; }

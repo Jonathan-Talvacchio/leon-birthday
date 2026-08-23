@@ -4,7 +4,7 @@
    Everything here is best effort: if caching fails for any reason the
    app still works, it just loads from the network like a normal page. */
 
-var CACHE_VERSION = "birthday-v9";
+var CACHE_VERSION = "birthday-v10";
 
 var FILES = [
   "./",
@@ -21,12 +21,8 @@ var FILES = [
   "./js/sprites.js",
   "./art/partypixel.ttf",
   "./art/dragon.png",
-  "./art/dragon-1.png",
-  "./art/dragon-2.png",
-  "./art/dragon-3.png",
-  "./art/dragon-4.png",
-  "./art/dragon-5.png",
-  "./art/dragon-6.png",
+  "./art/dragon-up.png",
+  "./art/dragon-down.png",
   "./art/candle.png",
   "./art/flame.png",
   "./art/grass-block.png",

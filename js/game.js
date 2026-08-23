@@ -536,10 +536,10 @@ var Game = (function () {
     if (dragonAnim && Sprites.isLoaded()) return dragonAnim;
     if (!Sprites.has("dragon")) return null;
 
-    var names = ["dragon"];
-    for (var i = 1; i <= 6; i++) {
-      if (Sprites.has("dragon" + i)) names.push("dragon" + i);
-    }
+    var names = ["dragon"];                       // wings level
+    if (Sprites.has("dragonUp")) names.push("dragonUp");
+    if (Sprites.has("dragonDown")) names.push("dragonDown");
+    var i;
 
     var box = null;
     for (i = 0; i < names.length; i++) {
@@ -565,12 +565,12 @@ var Game = (function () {
       var fb = Sprites.bounds(names[i]);
       feet.push(fb ? (fb.y + fb.h) - box.h : box.y);
     }
-    /* The frames run from wings out to wings raised, so play them up and
-       back down again for a full beat instead of snapping back to the
-       start. The two end poses are not repeated at the turnaround. */
-    var seq = [];
-    for (i = 0; i < names.length; i++) seq.push(i);
-    for (i = names.length - 2; i > 0; i--) seq.push(i);
+    /* Three drawn poses cycled the way the original Flappy Bird does it:
+       level, up, level, down. Not a stretch between two pictures. */
+    var seq;
+    if (names.length >= 3)      seq = [0, 1, 0, 2];
+    else if (names.length === 2) seq = [0, 1];
+    else                         seq = [0];
 
     dragonAnim = { names: names, box: box, seq: seq, feet: feet };
     return dragonAnim;
@@ -584,9 +584,8 @@ var Game = (function () {
          the body itself the size it was before the wings could lift */
       var h = 86;
       var w = h * (box.w / box.h);
-      /* about two full wing beats a second in flight, a little lazier
-         while he is hovering waiting to start */
-      var fps = mode === "play" ? 24 : 16;
+      /* wing beats per second, brisker in flight than while hovering */
+      var fps = mode === "play" ? 11 : 7;
       var seq = anim.seq;
       var frame = seq[Math.floor(t * fps) % seq.length];
       var sp = Sprites.get(anim.names[frame]);
