@@ -96,14 +96,26 @@ world units.
 Physics runs on a **fixed 1/120s timestep with an accumulator**, `dt` clamped to 0.25s, so it plays
 the same at 60Hz and 120Hz and never teleports through a candle after the screen sleeps.
 
+To make it easier: bigger `gapStart`/`gapMin`, bigger `spacing`, smaller `scroll`, smaller `gravity`.
+`hitR` (17) is deliberately well inside `dragonR` (22) so near misses forgive rather than punish.
+
 Modes are `ready` → `play` → `dead`. Nothing moves in `ready`: the countdown is a flourish and the
 first tap starts the game. This is deliberate — gravity used to take over on its own and dropped the
 dragon on the floor within 0.8s if he hadn't touched the screen yet.
 
 ### Audio
 
-`js/audio.js` synthesizes everything. One shot effects go straight to the master gain; **each run of a
+`js/audio.js` synthesizes everything. The global is `Sfx`, not `Audio`, so it cannot clash with
+`window.Audio` — keep it that way. One shot effects go straight to the master gain; **each run of a
 tune gets its own gain node** so a tune fading out cannot be revived by the one replacing it.
+
+Tunes are data: `MELODIES[name] = { beat: seconds, notes: [["G4", beats], ...], chords: [...] }`,
+where `chords` is optional and renders a waltz left hand (root on beat one, chord on the rest). Two
+invariants, both of which fail loudly or subtly rather than obviously:
+
+- Chord beats must total exactly the melody beats, or the accompaniment drifts out of the tune.
+- Every note name must exist in `N` and every chord in `CHORDS`; a typo yields an undefined frequency
+  and throws when scheduled. Worth a quick script over the arrays after editing a melody.
 
 Nothing is scheduled while the AudioContext is suspended — notes queued then would all fire at once on
 resume — so a tune requested before the first tap is held in `pending` and started by `unlock()`.
