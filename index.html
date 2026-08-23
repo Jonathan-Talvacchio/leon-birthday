@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+<title>Happy 7th Birthday Leon!</title>
+<meta name="description" content="A birthday celebration app with confetti, balloons and a dragon flying game." />
+<meta name="theme-color" content="#5ec2ff" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" type="image/svg+xml" href="icon.svg" />
+<link rel="apple-touch-icon" href="icon.svg" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Background sky: sits behind everything -->
+  <div id="sky" aria-hidden="true">
+    <div class="sun"></div>
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <div class="cloud c3"></div>
+    <div class="hills"></div>
+  </div>
+
+  <!-- Tappable balloons live below the screens so buttons stay on top -->
+  <div id="balloon-layer" aria-hidden="true" hidden></div>
+
+  <!-- Confetti draws over everything but never eats taps -->
+  <canvas id="confetti-canvas" aria-hidden="true"></canvas>
+
+  <button id="mute-btn" class="icon-btn mute-btn" type="button" aria-label="Turn sound on or off">
+    <span id="mute-icon">&#128266;</span>
+  </button>
+
+  <!-- ===================== HOME ===================== -->
+  <section id="screen-home" class="screen is-active">
+    <div class="home-inner">
+      <h1 class="title">
+        <span class="t-small">Happy</span>
+        <span class="t-big" id="age-line">7th</span>
+        <span class="t-small">Birthday</span>
+        <span class="t-name" id="name-line">Leon!</span>
+      </h1>
+      <p class="hint">Tap the balloons to pop them!</p>
+      <div class="buttons">
+        <button class="big-btn play" id="btn-play" type="button">&#128009; Play Dragon Flap</button>
+        <button class="big-btn card" id="btn-card" type="button">&#128140; My Birthday Card</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CARD ===================== -->
+  <section id="screen-card" class="screen">
+    <div class="card-panel">
+      <h2 id="card-title">Happy Birthday, Leon!</h2>
+      <p id="card-message"></p>
+
+      <div id="cake" class="cake" role="button" tabindex="0" aria-label="Tap to blow out the candles">
+        <div class="candles" id="candles"></div>
+        <div class="layer layer-top"></div>
+        <div class="layer layer-mid"></div>
+        <div class="layer layer-bottom"></div>
+        <div class="plate"></div>
+      </div>
+
+      <p class="cake-hint" id="cake-hint">Tap the cake to blow out the candles &#127874;</p>
+      <button class="big-btn back" id="btn-card-back" type="button">&#11013; Back</button>
+    </div>
+  </section>
+
+  <!-- ===================== GAME ===================== -->
+  <section id="screen-game" class="screen">
+    <canvas id="game-canvas"></canvas>
+    <button class="icon-btn back-btn" id="btn-game-back" type="button" aria-label="Back to party">&#11013;</button>
+    <div class="hud" id="hud"><span id="hud-score">0</span></div>
+
+    <div class="overlay" id="game-over" hidden>
+      <div class="over-panel">
+        <h2 id="over-title">Nice flying!</h2>
+        <p class="score-row">Score <b id="final-score">0</b></p>
+        <p class="score-row">Best <b id="best-score">0</b></p>
+        <button class="big-btn play" id="btn-retry" type="button">&#128260; Play Again</button>
+        <button class="big-btn back" id="btn-over-back" type="button">&#11013; Back</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/config.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/confetti.js"></script>
+  <script src="js/balloons.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

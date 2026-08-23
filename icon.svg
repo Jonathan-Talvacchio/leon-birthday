@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3fa9f5"/>
+      <stop offset="1" stop-color="#a9e6ff"/>
+    </linearGradient>
+    <radialGradient id="flame" cx="50%" cy="72%" r="60%">
+      <stop offset="0.25" stop-color="#fff3b0"/>
+      <stop offset="0.6" stop-color="#ffb200"/>
+      <stop offset="1" stop-color="#ff6a00"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="96" fill="url(#sky)"/>
+
+  <!-- confetti -->
+  <g opacity="0.95">
+    <rect x="70"  y="70"  width="26" height="14" rx="4" fill="#ff4d6d" transform="rotate(-24 83 77)"/>
+    <rect x="410" y="96"  width="26" height="14" rx="4" fill="#ffd166" transform="rotate(31 423 103)"/>
+    <rect x="120" y="360" width="24" height="13" rx="4" fill="#06d6a0" transform="rotate(14 132 366)"/>
+    <rect x="392" y="330" width="24" height="13" rx="4" fill="#b388ff" transform="rotate(-38 404 336)"/>
+    <circle cx="330" cy="66" r="10" fill="#ffffff"/>
+    <circle cx="176" cy="120" r="9" fill="#f72585"/>
+  </g>
+
+  <!-- candle flame -->
+  <path d="M256 84c26 30 24 62 0 84-24-22-26-54 0-84z" fill="url(#flame)"/>
+  <!-- candle -->
+  <rect x="242" y="168" width="28" height="72" rx="10" fill="#fff0f6"/>
+  <rect x="242" y="168" width="9"  height="72" fill="#ff5d8f"/>
+  <rect x="261" y="168" width="9"  height="72" fill="#ff5d8f"/>
+
+  <!-- cake -->
+  <rect x="186" y="238" width="140" height="58" rx="12" fill="#ff9cc0"/>
+  <rect x="186" y="238" width="140" height="20" rx="10" fill="#fff1f6"/>
+  <rect x="152" y="292" width="208" height="62" rx="12" fill="#ffb3a7"/>
+  <rect x="152" y="292" width="208" height="20" rx="10" fill="#fff1f6"/>
+  <rect x="116" y="350" width="280" height="66" rx="12" fill="#c58bff"/>
+  <rect x="116" y="350" width="280" height="22" rx="11" fill="#fff1f6"/>
+  <rect x="96"  y="412" width="320" height="24" rx="12" fill="#dfe6f5"/>
+</svg>

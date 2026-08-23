@@ -1,0 +1,15 @@
+{
+  "name": "Leon's Birthday Party",
+  "short_name": "Birthday",
+  "description": "Confetti, balloons and Dragon Flap - a birthday celebration app.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#5ec2ff",
+  "theme_color": "#5ec2ff",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
