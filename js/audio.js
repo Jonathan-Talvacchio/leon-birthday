@@ -245,9 +245,9 @@ var Sfx = (function () {
 
   /* left hand chords, written under the melody */
   var CHORDS = {
-    F:   { bass: 174.61, tones: [220.00, 261.63] },          // F  A  C
-    C7:  { bass: 130.81, tones: [164.81, 196.00, 233.08] },  // C  E  G  Bb
-    Bb:  { bass: 116.54, tones: [146.83, 174.61] }           // Bb D  F
+    G:   { bass: 196.00, tones: [246.94, 293.66] },          // G  B  D
+    D7:  { bass: 146.83, tones: [220.00, 261.63] },          // D  A  C
+    C:   { bass: 130.81, tones: [196.00, 261.63] }           // C  G  C
   };
 
   /* [note, beats] */
@@ -262,27 +262,26 @@ var Sfx = (function () {
         ["F5", .5], ["F5", .5], ["E5", 1], ["C5", 1], ["D5", 1], ["C5", 2.5]
       ]
     },
-    /* Las Mananitas, in F major and 3/4 as the sheet music has it, at a
-       100bpm waltz. One beat pickup then five bars of three. The chord
-       row is the left hand: root on beat one, chord on beats two and
-       three, using the F / C7 / Bb of the score. */
+    /* Las Mananitas, from the piano score: G major, 3/4, a one beat
+       pickup then five bars of three, at 90bpm. The chord row is the
+       left hand - root on beat one, chord on beats two and three. */
     mananitas: {
-      beat: 0.6,
+      beat: 0.667,
       notes: [
-        ["C4", 1],                                        // pickup
-        ["F4", 1], ["F4", 1], ["E4", .5], ["F4", .5],     // bar 1
-        ["G4", 1], ["G4", 1], ["F4", 1],                  // bar 2
-        ["A4", 1], ["C5", 1], ["Bb4", 1],                 // bar 3
-        ["A4", 1], ["G4", 2],                             // bar 4
-        ["F4", 3]                                         // bar 5
+        ["D4", 1],                                          // pickup
+        ["G4", 1], ["G4", 1], ["F#4", .5], ["G4", .5],      // bar 1
+        ["A4", 1], ["A4", 1], ["G4", 1],                    // bar 2
+        ["B4", 1], ["D5", 1], ["C5", 1],                    // bar 3
+        ["B4", 1], ["A4", 2],                               // bar 4
+        ["G4", 3]                                           // bar 5
       ],
       chords: [
-        ["C7", 1],
-        ["F", 3],
-        ["C7", 3],
-        ["F", 2], ["Bb", 1],
-        ["C7", 3],
-        ["F", 3]
+        ["D7", 1],
+        ["G", 3],
+        ["D7", 3],
+        ["G", 2], ["C", 1],
+        ["D7", 3],
+        ["G", 3]
       ]
     }
   };
