@@ -374,3 +374,164 @@ html, body {
 @media (prefers-reduced-motion: reduce) {
   .sun, .cloud, .t-big, .t-name, .flame, .balloon .sway { animation: none; }
 }
+
+/* ============================================================
+   MINECRAFT THEME
+   Blocky UI, flat palette, pixel art rendered crisp. Anything
+   below here deliberately overrides the softer styles above.
+   ============================================================ */
+
+:root {
+  --mc-sky:    #79a6ff;
+  --mc-sky2:   #a8d0ff;
+  --mc-grass:  #5d9c3b;
+  --mc-dirt:   #8b5a2b;
+  --mc-gui:    #c6c6c6;
+  --mc-gui-lt: #ffffff;
+  --mc-gui-dk: #555555;
+  --mc-stone:  #8b8b8b;
+}
+
+img, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
+
+/* ---- flat blocky sky ---- */
+#sky { background: linear-gradient(180deg, var(--mc-sky) 0%, var(--mc-sky) 55%, var(--mc-sky2) 100%); }
+
+/* Minecraft's sun is a square */
+.sun {
+  border-radius: 0;
+  background: #ffee88;
+  box-shadow: 0 0 0 6px #fff6b0, 0 0 40px rgba(255, 240, 150, .7);
+  animation: none;
+}
+
+/* clouds become flat white slabs */
+.cloud { border-radius: 0; background: #ffffff; opacity: .92; }
+.cloud::before, .cloud::after { border-radius: 0; }
+.cloud::before { width: 55%; height: 100%; left: 18%; top: -60%; }
+.cloud::after  { width: 38%; height: 80%;  right: 12%; top: -30%; }
+
+/* the ground strip uses the same grass block as the game */
+.hills {
+  bottom: 0;
+  height: 14vmin;
+  background: url("art/grass-block.png") repeat-x left top;
+  background-size: auto 100%;
+  image-rendering: pixelated;
+}
+
+/* ---- blocky buttons ---- */
+.big-btn {
+  border-radius: 0;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #ffffff;
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, .55);
+  border: 3px solid #1d1d1d;
+  box-shadow: inset 3px 3px 0 rgba(255, 255, 255, .35),
+              inset -3px -3px 0 rgba(0, 0, 0, .35),
+              0 6px 0 #1d1d1d;
+  transition: none;
+}
+.big-btn:active {
+  transform: translateY(4px);
+  box-shadow: inset 3px 3px 0 rgba(255, 255, 255, .25),
+              inset -3px -3px 0 rgba(0, 0, 0, .35),
+              0 2px 0 #1d1d1d;
+}
+.big-btn.play { background: #5d9c3b; }
+.big-btn.card { background: #b8577f; }
+.big-btn.back { background: #6c8ab8; }
+
+.icon-btn {
+  border-radius: 0;
+  background: var(--mc-gui);
+  border: 3px solid #1d1d1d;
+  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .6),
+              inset -2px -2px 0 rgba(0, 0, 0, .3);
+}
+
+/* ---- Minecraft GUI panels ---- */
+.card-panel, .over-panel {
+  background: var(--mc-gui);
+  border: 4px solid #1d1d1d;
+  border-radius: 0;
+  box-shadow: inset 4px 4px 0 rgba(255, 255, 255, .65),
+              inset -4px -4px 0 rgba(0, 0, 0, .28),
+              0 10px 0 rgba(0, 0, 0, .35);
+  color: #2b2b2b;
+  animation: none;
+}
+#card-title, #over-title {
+  color: #3b2a55;
+  text-shadow: 2px 2px 0 rgba(255, 255, 255, .6);
+}
+#card-message { color: #2b2b2b; }
+.cake-hint { color: #4a4a4a; }
+.score-row b { color: #a63f6b; }
+
+/* ---- title ---- */
+.title span { -webkit-text-stroke: 0; text-shadow: 5px 5px 0 rgba(0, 0, 0, .45); }
+.t-big  { color: #ffd83d; animation: none; }
+.t-name { color: #ff7edb; animation: none; }
+.hint   { text-shadow: 3px 3px 0 rgba(0, 0, 0, .45); }
+
+/* ---- pixel balloons ---- */
+.balloon img.pixel {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, .25));
+}
+
+/* ---- pixel cake ---- */
+.cake-img {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+.cake.has-art { width: 46vmin; max-width: 230px; height: 46vmin; max-height: 230px; }
+.cake.has-art .layer, .cake.has-art .plate { display: none; }
+.cake.has-art .candles { bottom: 52%; gap: 1.6vmin; }
+
+/* HUD score in the game */
+.hud { -webkit-text-stroke: 0; text-shadow: 5px 5px 0 rgba(0, 0, 0, .6); }
+
+/* ---- the pixel font (generated with PixelLab, bundled so it works offline) ---- */
+@font-face {
+  font-family: "PartyPixel";
+  src: url("art/partypixel.ttf") format("truetype");
+  font-display: swap;
+}
+body, .big-btn {
+  font-family: "PartyPixel", "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+/* pixel glyphs are wide and need a little air */
+.title span { letter-spacing: 2px; }
+.big-btn { letter-spacing: 2px; font-size: clamp(15px, 3.4vmin, 24px); }
+#card-message { line-height: 1.7; font-size: clamp(13px, 2.7vmin, 18px); }
+.cake-hint, .hint { letter-spacing: 1px; }
+
+/* Keep the blocky clouds small and high so they never sit behind the
+   title or the hint text. */
+.cloud { opacity: .8; }
+.c1 { width: 16vmin; height: 4.5vmin; top: 8%;  }
+.c2 { width: 12vmin; height: 3.5vmin; top: 20%; }
+.c3 { width: 20vmin; height: 5vmin;   top: 33%; opacity: .6; }
+.hint { color: #ffffff; text-shadow: 3px 3px 0 #2b2b4a, 0 0 10px rgba(0,0,0,.5); }
+
+/* candles on the pixel cake: square them off and outline them to match */
+.cake.has-art .candle {
+  border-radius: 0;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, .75);
+  width: 2vmin;
+  max-width: 10px;
+}
+.cake.has-art .flame { border-radius: 2px; }

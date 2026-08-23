@@ -4,7 +4,7 @@
    Everything here is best effort: if caching fails for any reason the
    app still works, it just loads from the network like a normal page. */
 
-var CACHE_VERSION = "birthday-v3";
+var CACHE_VERSION = "birthday-v5";
 
 var FILES = [
   "./",
@@ -17,7 +17,18 @@ var FILES = [
   "./js/confetti.js",
   "./js/balloons.js",
   "./js/game.js",
-  "./js/main.js"
+  "./js/main.js",
+  "./js/sprites.js",
+  "./art/partypixel.ttf",
+  "./art/dragon.png",
+  "./art/candle.png",
+  "./art/flame.png",
+  "./art/grass-block.png",
+  "./art/cloud.png",
+  "./art/cake.png",
+  "./art/balloon-red.png",
+  "./art/balloon-blue.png",
+  "./art/balloon-yellow.png"
 ];
 
 self.addEventListener("install", function (e) {

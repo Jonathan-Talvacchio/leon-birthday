@@ -132,6 +132,21 @@
       bestScore: $("best-score")
     });
 
+    /* Pixel art loads in the background; every drawing falls back to the
+       hand drawn version until (and unless) its sprite turns up. */
+    Sprites.load(window.ART || {}, function () {
+      var cakeImg = $("cake-img");
+      if (Sprites.has("cake") && cakeImg) {
+        cakeImg.src = Sprites.src("cake");
+        cakeImg.hidden = false;
+        cake.classList.add("has-art");
+      }
+      if (current === "home") {        // restart so balloons pick up their sprites
+        Balloons.stop();
+        Balloons.start();
+      }
+    });
+
     Sfx.setMuted(loadMuted());
     paintMute();
 

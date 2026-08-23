@@ -87,6 +87,7 @@ var Game = (function () {
     W = cssW / scale;
     H = cssH / scale;
     ctx.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
+    Sprites.crisp(ctx);              // keep pixel art sharp
 
     skyGrad = ctx.createLinearGradient(0, 0, 0, H);
     skyGrad.addColorStop(0.00, "#3fa9f5");
@@ -328,6 +329,14 @@ var Game = (function () {
   }
 
   function drawClouds() {
+    var sp = Sprites.get("cloud");
+    if (sp) {
+      for (var k = 0; k < clouds.length; k++) {
+        var cc = clouds[k], w = 78 * cc.s;
+        ctx.drawImage(sp, cc.x - w / 2, cc.y - w / 4, w, w * 0.5);
+      }
+      return;
+    }
     ctx.fillStyle = "rgba(255,255,255,0.85)";
     for (var i = 0; i < clouds.length; i++) {
       var c = clouds[i], s = c.s;
@@ -397,13 +406,69 @@ var Game = (function () {
     ctx.stroke();
   }
 
+  /* One candle, built from the sprite's wax only: a rim at the gap end
+     and a single row of that same wax stretched down the shaft, so the
+     column is seamless at any length and the flame stays a sensible size.
+     tipY is the gap end, endY is the ceiling or the ground. */
+  function drawSpriteCandle(sp, box, x, w, tipY, endY, flip, seed) {
+    var rimH = w * (box.wideH / box.w) * 0.42;   // just the top lip of the wax
+    var dir = flip ? -1 : 1;                      // which way the candle runs
+
+    var shaftTop = flip ? endY : tipY + rimH;
+    var shaftBottom = flip ? tipY - rimH : endY;
+
+    if (shaftBottom - shaftTop > 0) {
+      var waxRow = box.wideY + Math.round(box.wideH * 0.75);
+      ctx.drawImage(sp, box.x, waxRow, box.w, 1,
+                    x, shaftTop, w, shaftBottom - shaftTop);
+    }
+
+    /* the wax rim, mirrored when the candle hangs from the ceiling */
+    var rimSrcH = Math.max(1, Math.round(box.wideH * 0.42));
+    var rimTop = flip ? tipY - rimH : tipY;
+    ctx.save();
+    if (flip) {
+      ctx.translate(0, rimTop + rimH / 2);
+      ctx.scale(1, -1);
+      ctx.translate(0, -(rimTop + rimH / 2));
+    }
+    ctx.drawImage(sp, box.x, box.wideY, box.w, rimSrcH, x, rimTop, w, rimH);
+    ctx.restore();
+
+    /* flame sitting just off the tip, flickering */
+    var fl = Sprites.get("flame");
+    if (fl) {
+      var fb = Sprites.bounds("flame");
+      var fh = w * 0.62 * (1 + Math.sin(t * 11 + seed) * 0.09);
+      var fw = fh * (fb.w / fb.h);
+      var fy = flip ? tipY + fh * 0.1 : tipY - rimH * 0.1 - fh;
+      ctx.save();
+      if (flip) {
+        ctx.translate(0, fy + fh / 2);
+        ctx.scale(1, -1);
+        ctx.translate(0, -(fy + fh / 2));
+      }
+      ctx.drawImage(fl, fb.x, fb.y, fb.w, fb.h, x + (w - fw) / 2, fy, fw, fh);
+      ctx.restore();
+    }
+  }
+
   function drawObstacles() {
     var gY = groundY();
+    var sp = Sprites.get("candle");
+    var box = sp ? Sprites.bounds("candle") : null;
+
     for (var i = 0; i < obs.length; i++) {
       var o = obs[i];
       if (o.x > W + 40 || o.x + CONFIG.candleW < -40) continue;
       var topEnd = o.gy - o.gap / 2;
       var botStart = o.gy + o.gap / 2;
+
+      if (sp && box) {
+        drawSpriteCandle(sp, box, o.x, CONFIG.candleW, topEnd, -30, true, o.seed);
+        drawSpriteCandle(sp, box, o.x, CONFIG.candleW, botStart, gY + 6, false, o.seed + 3);
+        continue;
+      }
 
       drawCandleBody(o.x, -30, CONFIG.candleW, topEnd + 30, "#ff7fb2", "#fff0f6");
       drawFlame(o.x + CONFIG.candleW / 2, topEnd - 4, -1, o.seed);
@@ -415,6 +480,18 @@ var Game = (function () {
 
   function drawGround() {
     var gY = groundY();
+
+    var sp = Sprites.get("grass");
+    if (sp) {
+      var tile = CONFIG.groundH;
+      var startX = -(groundOff % tile) - tile;
+      for (var gx = startX; gx < W + tile; gx += tile) {
+        ctx.drawImage(sp, gx, gY, tile, tile);
+        if (H - gY > tile) ctx.drawImage(sp, gx, gY + tile, tile, tile);
+      }
+      return;
+    }
+
     ctx.fillStyle = "#7ddb92";
     ctx.fillRect(0, gY, W, H - gY);
     ctx.fillStyle = "#66c77c";
@@ -424,6 +501,21 @@ var Game = (function () {
   }
 
   function drawDragon() {
+    var sp = Sprites.get("dragon");
+    if (sp) {
+      var box = Sprites.bounds("dragon");
+      var h = 62;
+      var w = h * (box.w / box.h);
+      /* a gentle bob stands in for the wing flap of the drawn version */
+      var bob = Math.sin(dragon.wing) * 2.5;
+      ctx.save();
+      ctx.translate(dragonX(), dragon.y);
+      ctx.rotate(dragon.rot);
+      ctx.drawImage(sp, box.x, box.y, box.w, box.h, -w / 2, -h / 2 + bob, w, h);
+      ctx.restore();
+      return;
+    }
+
     var wing = Math.sin(dragon.wing) * 0.8;
     ctx.save();
     ctx.translate(dragonX(), dragon.y);

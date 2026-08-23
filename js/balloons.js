@@ -31,10 +31,21 @@ var Balloons = (function () {
       '</svg>';
   }
 
+  /* Pixel balloons when the art has arrived, drawn ones until then. */
+  function art() {
+    var srcs = [];
+    for (var i = 0; i < 3; i++) {
+      var s = Sprites.src("balloon" + i);
+      if (s) srcs.push(s);
+    }
+    return srcs;
+  }
+
   function make(immediate) {
     if (!layer || layer.children.length >= MAX) return;
 
     var c = COLORS[(Math.random() * COLORS.length) | 0];
+    var pixel = art();
     var el = document.createElement("div");
     el.className = "balloon";
     el.style.left = (3 + Math.random() * 80) + "%";
@@ -48,7 +59,15 @@ var Balloons = (function () {
     var sway = document.createElement("div");
     sway.className = "sway";
     sway.style.animationDuration = (2.8 + Math.random() * 1.8) + "s";
-    sway.innerHTML = svg(c[0], c[1]);
+    if (pixel.length) {
+      var im = document.createElement("img");
+      im.src = pixel[(Math.random() * pixel.length) | 0];
+      im.alt = "";
+      im.className = "pixel";
+      sway.appendChild(im);
+    } else {
+      sway.innerHTML = svg(c[0], c[1]);
+    }
 
     el.appendChild(sway);
     el.addEventListener("animationend", function (e) {
